@@ -14,21 +14,27 @@ grammar Journal {
 }
 	
 class Journal-actions{
+    has @!dates;
+    has @!authors;
+    my Str $empty = '';
+
     method TOP ($/) {
-        # different ways of using hyper
-        my @contents = $<content>
-            .hyper
-            .grep(not * ~~ '');
-        my @sigs = $<sig>;
-	my @entries = (zip(@sigs>>{'author', 'date'}, @contents)).race.map: (-> 
-	(($author, $date), $content) { 
-		%(author => $author.Str, date => $date.Str, content => $content.Str) 
+	my @contents = $<content>.grep(not * ~~ $empty)>>.Str;
+
+	my @entries = (@!authors Z @!dates Z @contents).map(-> 
+	($author, $date, $content) { 
+		%(author => $author, date => $date, content => $content) 
 	});
         make {
             entries => @entries
         }
     }
-
+    method date($/){
+	@!dates.push($/.Str)
+    }
+    method author($/){
+	@!authors.push($/.Str)
+    }
 }
 my $path := "Journal.txt";
 my $result = Journal.parsefile($path, :enc("UTF-8"),
