@@ -12,9 +12,12 @@ const TOKEN_PATH = 'token.json';
 fs.readFile('credentials.json', (err, content) => {
   if (err) return console.log('Error loading client secret file:', err);
   // Authorize a client with credentials, then call the Google Docs API.
-  authorize(JSON.parse(content), (auth) => printDocTitle(auth).catch(e => `Caught an error: ${e}`));
+  authorize(JSON.parse(content), async auth => {
+    await printDocTitle(auth).catch(err => {
+      throw `Caught an error: ${err}`
+    })
+  });
 });
-
 /**
  * Create an OAuth2 client with the given credentials, and then execute the
  * given callback function.
@@ -70,20 +73,20 @@ function getNewToken(oAuth2Client, callback) {
  * https://docs.google.com/document/d/195j9eDD3ccgjQRttHhJPymLJUCOUjs-jmwTrekvdjFE/edit
  * @param {google.auth.OAuth2} auth The authenticated Google OAuth 2.0 client.
  */
-const SECRETS_PATH = "secrets.json";
+const SECRETS_PATH = "./secrets.json";
 const journalPath = "Journal.txt";
 async function printDocTitle(auth) {
   const docs = google.docs({version: 'v1', auth});
-  const documentId = await fs.readFile(SECRETS_PATH, (_, data) => JSON.parse(data).documentId)
-  .catch(err => `Problem loading the ${SECRETS_PATH} due to ${err}`);
-
-  let res = await docs.documents.get({documentId}).catch(e => {
-    console.log(`There was an error getting the document: ${e}`)
-    throw e;
-  });
-  
+  const secrets = fs.readFileSync(SECRETS_PATH)
+  const { documentId } = JSON.parse(secrets)
+  let res;
+  try {
+    res = await docs.documents.get({documentId})
+  }
+  catch(err){
+    console.log(`There was an error getting the document response: ${err}`)
+  }
   let contents = res.data.body.content;
-  //console.log(contents);
   let fullText = contents
   .reduce((acc, i) => {
     //reduce can take place of a filter + map
@@ -99,13 +102,8 @@ async function printDocTitle(auth) {
     }
     return acc
   },"");
-
   console.log(fullText);
-  
-  fs.writeFileSync(journalPath, fullText).catch(err => {
-    console.log(`Failed to write to file ${journalPath} 
-    due to ${err}`)
-  });
+  fs.writeFileSync(journalPath, fullText)
 /* More imperative version of fetching all text
   body.map(o => {
     if(o.paragraph && o.paragraph.elements){
