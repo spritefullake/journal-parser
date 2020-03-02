@@ -1,7 +1,4 @@
-use YAMLish;
-use Typesafe::HTML;
-use Typesafe::XHTML::Writer :ALL;
-use lib '.';
+use lib 'lib';
 use Journal;
 use Journal::Output;
 
