@@ -1,12 +1,13 @@
 use Test;
 use lib <lib>;
-use Parser;
+use Journal;
+use Journal::Output;
 ok True, "This is a test";
 
 my Str $input = "Journal.txt";
 my Str $output = "Journal.html";
-my $result = Parser::Journal.parsefile($input , :enc("UTF-8"),
-:actions(Parser::Journal-to-html.new));
+my $result = Journal::Journal.parsefile($input , :enc("UTF-8"),
+:actions(Journal::Output::Journal-to-html.new));
 my $str = $result.made<entries>.Str;
 $output.IO.spurt: $str;
 ok .&{

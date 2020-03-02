@@ -4,5 +4,6 @@
 credentials.json
 token.json
 secrets.json
-Journal.*
+Journal.txt
+Journal.html
 *.precomp
