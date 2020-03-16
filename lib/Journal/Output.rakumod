@@ -1,4 +1,4 @@
-use YAMLish;
+use JSON::Marshal;
 use Typesafe::HTML;
 use Typesafe::XHTML::Writer :ALL;
 use Journal;
@@ -22,6 +22,14 @@ module Journal::Output {
                 html (@!authors Z @!dates Z @!contents).hyper.map: &to-html;
             make {
                 entries => $entries
+            }
+        }
+    }
+    class Journal-to-JSON is Journal-to-hash {
+        method TOP ($/){
+            my $res = callsame;
+            make {
+                entries => marshal($res<entries>)
             }
         }
     }
