@@ -1,11 +1,8 @@
 /books
 /node_modules
 /.idea
-credentials.json
-token.json
-secrets.json
-Journal.txt
-Journal.html
 *.precomp
 /__pycache__
 /.mypy_cache
+/secrets
+/out

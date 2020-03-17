@@ -14,6 +14,8 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer # type: ignore
 from nltk.sentiment.util import * # type: ignore
 
 wnl = nltk.WordNetLemmatizer()
+journal_file = "out/Journal.json"
+analyzed_path = "out/Analyzed_Journal.json"
 
 def tokens_then_text(input : str):
     tokens = nltk.word_tokenize(input)
@@ -67,7 +69,7 @@ def filter_punctuation(tokens):
     # Remove punctuation from a token
     return [token for token in tokens if re.search(f"[^{string.punctuation}’]", token)]
 
-journal_file = "Journal.json"
+
 entries = read_in_json(journal_file)
 entries_by_author = list(analyze_by_author(entries))
 
@@ -105,5 +107,5 @@ plt.show()
 
 author_conditional_frequency(entries_by_author)
 
-with open("Analyzed_Journal.json","w") as output:
+with open(analyzed_path,"w") as output:
     output.write(json.dumps(entries))
