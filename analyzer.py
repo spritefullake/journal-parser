@@ -1,8 +1,9 @@
 import nltk # type: ignore
 import json
 import re
-from typing import List, Dict
-from itertools import islice
+import string
+from typing import List, Dict, Tuple
+from itertools import islice, combinations
 from functools import partial, reduce
 import matplotlib.pyplot as plt # type: ignore
 
@@ -30,12 +31,14 @@ def collect_unique(entries : List[Dict], key) -> Dict:
     collect_by_key = partial(collect_by, key)
     return reduce(collect_by_key, entries, {})
 
-def analyze_by_author(entries : List[Dict]):
+def analyze_by_author(entries : List[Dict]) -> Tuple[str, str]:
     get_content = partial(map, lambda entry : entry["content"])
     pipeline_per_author = lambda entries : "\n".join(get_content(entries)) # type: ignore
     
-    uniques = collect_unique(entries, "author").values()
-    return map(pipeline_per_author, uniques)
+    uniques = collect_unique(entries, "author")
+    authors = uniques.keys()
+    entries = uniques.values()
+    return zip(authors, map(pipeline_per_author, entries))
 
 def read_in_json(filename : str):
     try:
@@ -62,30 +65,45 @@ def enhance_entry(entry : Dict, content : str) -> Dict:
 
 def filter_punctuation(tokens):
     # Remove punctuation from a token
-    return [token for token in tokens if re.search("[^.,''`?!’]",token)]
+    return [token for token in tokens if re.search(f"[^{string.punctuation}’]", token)]
 
 journal_file = "Journal.json"
 entries = read_in_json(journal_file)
-entries_by_author = analyze_by_author(entries)
+entries_by_author = list(analyze_by_author(entries))
+
+def author_conditional_frequency(entries_by_author):
+    pronouns = ["i","me","you","us","he","she","him","her","they","them"]
+    return nltk.ConditionalFreqDist(
+        (author, word)
+        for author, entry in entries_by_author
+        for word in nltk.word_tokenize(entry.lower())
+        if word in pronouns
+    )
+def to_percent(count, tokens):
+    return count / len(set(tokens)) * 100
+def get_frequencies(tokens, start=0, sample_size=5):
+    
+    frequencies = nltk.FreqDist(tokens)
+    sliced = frequencies.most_common()[start : start + sample_size % len(frequencies)]
+    return [(word, to_percent(frequency, tokens)) for word, frequency in sliced]
+def plot_frequencies(frequent_words, word_frequencies):
+    plt.plot(frequent_words, word_frequencies)
 
 map(lambda entry : enhance_entry(entry, entry["content"]), entries)
 
-for aggregate in entries_by_author:
+for author, aggregate in entries_by_author:
     tokens = filter_punctuation(nltk.word_tokenize(aggregate))
 
-    to_percent = lambda count : count / len(set(tokens)) * 100
-    frequencies = nltk.FreqDist(tokens)
-    start_from = 0
-    sample_size = 10
-    sliced = frequencies.most_common()[start_from : start_from + sample_size % len(frequencies)]
-    frequent_words = [word for word, _ in sliced]
-    word_frequencies = [to_percent(frequency) for _, frequency in sliced]
-    plt.plot(frequent_words, word_frequencies)
-    plt.figure(1)
+    frequencies = get_frequencies(tokens, 0, 100)
+    # zip(*list_of_tuples) actually unzips 
+    plot_list = map(list, zip(*frequencies))
+    plot_frequencies(*plot_list)
     
-    normalized_frequences = [(token, to_percent(count)) for token, count in frequencies.most_common(10)]
+    normalized_frequences = [(token, to_percent(count, tokens)) for token, count in frequencies[:10]]
     print(normalized_frequences)
 plt.show()
+
+author_conditional_frequency(entries_by_author)
 
 with open("Analyzed_Journal.json","w") as output:
     output.write(json.dumps(entries))
