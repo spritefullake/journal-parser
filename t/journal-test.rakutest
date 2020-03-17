@@ -4,8 +4,8 @@ use Journal;
 use Journal::Output;
 ok True, "This is a test";
 
-my Str $input = "Journal.txt";
-my Str $output = "Journal.html";
+my Str $input = "out/Journal.txt";
+my Str $output = "out/Journal.html";
 my $result = Journal::Journal.parsefile($input , :enc("UTF-8"),
 :actions(Journal::Output::Journal-to-html.new));
 my $str = $result.made<entries>.Str;

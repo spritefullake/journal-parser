@@ -1,0 +1,27 @@
+{
+  "name": "journal_parser",
+  "version": "1.0.0",
+  "description": "Parses journals",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "dependencies": {
+    "googleapis": "^39.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "raku t/journal-test.rakutest | python analyzer_test.py",
+    "run": "node . | raku lib/Parser.raku | python analyzer.py"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spritefullake/journal-parser.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/spritefullake/journal-parser/issues"
+  },
+  "homepage": "https://github.com/spritefullake/journal-parser#readme"
+}
