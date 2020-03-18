@@ -1,3 +1,5 @@
+#!/usr/bin/env raku
+
 use JSON::Marshal;
 use Typesafe::HTML;
 use Typesafe::XHTML::Writer :ALL;

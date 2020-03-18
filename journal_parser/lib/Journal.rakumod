@@ -1,3 +1,5 @@
+#!/usr/bin/env raku
+
 unit module Journal;
 
 grammar Journal {

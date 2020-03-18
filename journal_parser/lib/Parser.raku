@@ -1,3 +1,5 @@
+#!/usr/bin/env raku
+
 use lib 'lib';
 use Journal;
 use Journal::Output;
