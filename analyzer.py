@@ -69,10 +69,6 @@ def filter_punctuation(tokens):
     # Remove punctuation from a token
     return [token for token in tokens if re.search(f"[^{string.punctuation}’]", token)]
 
-
-entries = read_in_json(journal_file)
-entries_by_author = list(analyze_by_author(entries))
-
 def author_conditional_frequency(entries_by_author):
     pronouns = ["i","me","you","us","he","she","him","her","they","them"]
     return nltk.ConditionalFreqDist(
@@ -81,18 +77,24 @@ def author_conditional_frequency(entries_by_author):
         for word in nltk.word_tokenize(entry.lower())
         if word in pronouns
     )
+
 def to_percent(count, tokens):
     return count / len(set(tokens)) * 100
+
 def get_frequencies(tokens, start=0, sample_size=5):
     
     frequencies = nltk.FreqDist(tokens)
     sliced = frequencies.most_common()[start : start + sample_size % len(frequencies)]
     return [(word, to_percent(frequency, tokens)) for word, frequency in sliced]
+
 def plot_frequencies(frequent_words, word_frequencies):
     plt.plot(frequent_words, word_frequencies)
 
-map(lambda entry : enhance_entry(entry, entry["content"]), entries)
 
+entries = read_in_json(journal_file)
+entries_by_author = list(analyze_by_author(entries))
+map(lambda entry : enhance_entry(entry, entry["content"]), entries)
+author_conditional_frequency(entries_by_author)
 for author, aggregate in entries_by_author:
     tokens = filter_punctuation(nltk.word_tokenize(aggregate))
 
@@ -104,8 +106,6 @@ for author, aggregate in entries_by_author:
     normalized_frequences = [(token, to_percent(count, tokens)) for token, count in frequencies[:10]]
     print(normalized_frequences)
 plt.show()
-
-author_conditional_frequency(entries_by_author)
 
 with open(analyzed_path,"w") as output:
     output.write(json.dumps(entries))

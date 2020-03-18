@@ -12,7 +12,7 @@
   "devDependencies": {},
   "scripts": {
     "test": "raku t/journal-test.rakutest | python analyzer_test.py",
-    "run": "node . | raku lib/Parser.raku | python analyzer.py"
+    "start": "node . | raku lib/Parser.raku | python analyzer.py"
   },
   "repository": {
     "type": "git",

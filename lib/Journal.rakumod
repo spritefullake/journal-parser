@@ -40,6 +40,3 @@ role Journal-actions is export {
         @!contents.push($/<content>.Str);
     }
 }
-sub sayHi() is export {
-    say "HI this is journla";
-}
